@@ -1,0 +1,36 @@
+@ flatten arr :
+	$ rev_flag = false
+		? ~r:
+			rev_flag = true
+		? $2:
+			eprint "Error!"
+	^^ arr:
+		^ [] :
+		^ x :: l :
+			** x + (flatten l)
+		^ _ :
+			say "HAHA Error!"
+
+@ hello msg:
+	$ cap_flag = false
+	$ rev_flag = false
+	
+	? ~c:
+		cap_flag = true
+	? ~r:
+		rev_flag = true
+	? !($1 +> $args):
+		eprint 'Error!\ I\ need\ arguments!
+		**
+	
+	echo "hello, " + msg + 
+	$ ele +> $args:
+		? cap_flag:
+			echo to_upper ele
+		?? rev_flag:
+			echo reverse ele
+		_ : 
+			echo ele
+		
+		
+			
