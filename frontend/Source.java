@@ -1,9 +1,11 @@
 package gly.frontend;
 
+import gly.message.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public class Source {
+public class Source implements MessageProducer {
 	public static final char EOL = '\n';
 	public static final char EOF = (char) 0;
 	
@@ -15,9 +17,11 @@ public class Source {
 	private int lineNum; //line number
 	private int currentPos; //source line position
 	
+	private MessageHandler messageHandler;
+	
 	public Source(BufferedReader reader) throws IOException {
 		this.lineNum = 0;
-		this.currentPos = -2 //read the first source line
+		this.currentPos = -2; //read the first source line
 		this.reader = reader;
 	}
 	
@@ -37,7 +41,7 @@ public class Source {
 		} else if ((currentPos == -1) || (currentPos == line.length())) { //end of line
 			return EOL;
 		} else if (currentPos > line.length()) { //exceed end of line
-			readline();
+			readLine();
 			return nextChar();
 		} else { //normal
 			return line.charAt(currentPos);
@@ -59,12 +63,16 @@ public class Source {
 		return nextPos < line.length() ? line.charAt(nextPos) : EOL;
 	}
 	
-	public void readline() throws IOException {
+	public void readLine() throws IOException {
 		line = reader.readLine();
 		currentPos = -1;
 		
 		if (line != null) {
 			lineNum++;
+		}
+		
+		if (line != null) {
+			sendMessage(new Message(MessageType.SOURCE_LINE, new Object[]{lineNum, line}));
 		}
 	}
 	
@@ -77,5 +85,16 @@ public class Source {
 				throw ex;
 			}
 		}
+	}
+	
+	//LISTENER:
+	public void addMessageListener(MessageListener listener) {
+		messageHandler.addListener(listener);
+	}
+	public void removeMessageListener(MessageListener listener) {
+		messageHandler.removeListener(listener);
+	}
+	public void sendMessage(Message message) {
+		messageHandler.sendMessage(message);
 	}
 }
